@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Brandon Powers",
+    "classifications": [ "Web", "WebAPI", "Lambda" ],
+    "name": "A .NET Core Web API in Lambda on AWS",
+    "identity": "Powers.Aws.DotnetLambdaApi",
+    "shortName": "lambda-api",
+    "tags": {
+      "language": "C#",
+      "type":"project"
+    },
+    "sourceName": "DotnetLambda",
+    "preferNameDirectory": true
+ }

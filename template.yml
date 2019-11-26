@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Application that uses the ASP.NET Core framework running in Amazon Lambda.
+Parameters:
+  ProjectId:
+    Type: String
+    Description: AWS CodeStar project ID used to name project resources and create roles.
+  Stage:
+    Type: String
+    Description: The name for a project pipeline stage (such as Staging or Prod) for which resources are provisioned and deployed.
+    Default: 'Dev'
+  ShouldCreateBucket:
+    Type: String
+    AllowedValues:
+    - 'true'
+    - 'false'
+    Default: 'true'
+    Description: If true then the S3 bucket that will be proxied will be created with the CloudFormation stack.
+  BucketName:
+    Type: String
+    Description: Name of S3 bucket that will be proxied. If left blank a name will be generated.
+    MinLength: '0'
+Conditions:
+  CreateS3Bucket:
+    Fn::Equals:
+    - Ref: ShouldCreateBucket
+    - 'true'
+  BucketNameGenerated:
+    Fn::Equals:
+    - Ref: BucketName
+    - ''
+Resources:
+  AspNetCoreFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: DotnetLambda.Api::DotnetLambda.Api.LambdaEntryPoint::FunctionHandlerAsync
+      Runtime: dotnetcore2.1
+      CodeUri: ""
+      MemorySize: 256
+      Timeout: 30
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Policies:
+      - AWSLambdaFullAccess
+      Environment:
+        Variables:
+          AppS3Bucket:
+            Fn::If:
+            - CreateS3Bucket
+            - Ref: Bucket
+            - Ref: BucketName
+      Events:
+        ProxyResource:
+          Type: Api
+          Properties:
+            Path: "/{proxy+}"
+            Method: ANY
+        RootResource:
+          Type: Api
+          Properties:
+            Path: "/"
+            Method: ANY
+  Bucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateS3Bucket
+    Properties:
+      BucketName:
+        Fn::If:
+        - BucketNameGenerated
+        - Ref: AWS::NoValue
+        - Ref: BucketName
+  LambdaExecutionRole:
+    Description: Creating service role in IAM for AWS Lambda
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'CodeStar-${ProjectId}-lambda-${Stage}'
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [lambda.amazonaws.com]
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      #PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/CodeStar_${ProjectId}_PermissionsBoundary'
+Outputs:
+  ApiURL:
+    Description: API endpoint URL for this environment
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/
+  S3ProxyBucket:
+    Value:
+      Fn::If:
+      - CreateS3Bucket
+      - Ref: Bucket
+      - Ref: BucketName
