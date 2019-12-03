@@ -4,7 +4,7 @@ DotnetLambda API
 DotnetLambda.Api is an ASP.NET core web API that runs serverless on AWS API Gateway and Lambda
 It utilizes the AWS Sam framework for building and deploying serverless applications. The SAM
 template (template.yml) compliles to CloudFormation and all the AWS resources are managed in
-this project as IaaC.
+this project as IaC.
 
 What's Here
 -----------
@@ -27,21 +27,6 @@ This sample includes:
 
 Getting Started
 ---------------
-
-# View the CodeStar dashboard
-https://console.aws.amazon.com/codestar/home?region=us-east-1#/projects/DotnetLambda-api/dashboard
-
-# Adding new developers to the project
-https://console.aws.amazon.com/codestar/home?region=us-east-1#/projects/DotnetLambda-api/team
-
-# Code repo
-https://console.aws.amazon.com/codesuite/codecommit/repositories/DotnetLambda-Api/browse?region=us-east-1
-
-# CI/CD pipeline
-https://console.aws.amazon.com/codesuite/codepipeline/pipelines/DotnetLambda-api-Pipeline/view?region=us-east-1
-
-# API Gateway
-https://console.aws.amazon.com/apigateway/home?region=us-east-1#/apis/d4dg0zzeg3/resources/ro0puhba7k
 
 # Debugging Locally via Kestrel
 
